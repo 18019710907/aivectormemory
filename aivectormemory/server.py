@@ -1,4 +1,5 @@
 import sys
+from aivectormemory import __version__
 from aivectormemory.protocol import (
     read_message, write_message, make_result, make_error,
     METHOD_NOT_FOUND, INVALID_PARAMS, INTERNAL_ERROR, SERVER_ERROR
@@ -18,21 +19,42 @@ class MCPServer:
     def _init_db(self):
         init_db(self.cm.conn)
         row = self.cm.conn.execute(
-            "SELECT MAX(session_id) as max_sid FROM memories WHERE project_dir=?",
+            "SELECT last_session_id FROM session_state WHERE project_dir=?",
             (self.cm.project_dir,)
         ).fetchone()
-        self._session_id = (row["max_sid"] or 0)
+        if row:
+            self._session_id = row["last_session_id"]
+        else:
+            # 首次：从 memories 表兼容恢复，并创建 session_state 行
+            row = self.cm.conn.execute(
+                "SELECT MAX(session_id) as max_sid FROM memories WHERE project_dir=?",
+                (self.cm.project_dir,)
+            ).fetchone()
+            self._session_id = (row["max_sid"] or 0)
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc).isoformat()
+            self.cm.conn.execute(
+                "INSERT OR IGNORE INTO session_state (project_dir, last_session_id, updated_at) VALUES (?,?,?)",
+                (self.cm.project_dir, self._session_id, now)
+            )
+            self.cm.conn.commit()
 
     def handle_initialize(self, req_id, params):
         if not self._initialized:
             self._init_db()
             self._initialized = True
         self._session_id += 1
+        # 持久化 session_id
+        self.cm.conn.execute(
+            "UPDATE session_state SET last_session_id=? WHERE project_dir=?",
+            (self._session_id, self.cm.project_dir)
+        )
+        self.cm.conn.commit()
         print(f"[aivectormemory] Session {self._session_id} started, project={self.cm.project_dir}", file=sys.stderr)
         write_message(make_result(req_id, {
             "protocolVersion": "2024-11-05",
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "aivectormemory", "version": "0.1.1"}
+            "serverInfo": {"name": "aivectormemory", "version": __version__}
         }))
 
     def handle_tools_list(self, req_id, params):

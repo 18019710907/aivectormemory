@@ -21,16 +21,16 @@ def handle_recall(args, *, cm, engine, **_):
         return json.dumps(success_response(memories=rows))
 
     embedding = engine.encode(query)
-    rows = repo.search_by_vector(embedding, top_k=top_k, scope=scope, project_dir=cm.project_dir)
+
+    if tags:
+        rows = repo.search_by_vector_with_tags(embedding, tags, top_k=top_k, scope=scope, project_dir=cm.project_dir)
+    else:
+        rows = repo.search_by_vector(embedding, top_k=top_k, scope=scope, project_dir=cm.project_dir)
 
     results = []
     for r in rows:
         distance = r.pop("distance", 0)
-        r["similarity"] = round(1 - (distance ** 2) / 2, 4)
-        if tags:
-            mem_tags = json.loads(r.get("tags", "[]")) if isinstance(r.get("tags"), str) else r.get("tags", [])
-            if not any(t in mem_tags for t in tags):
-                continue
+        r["similarity"] = round(1 - (distance ** 2) / 2, 4) if not tags else round(1 - distance, 4)
         results.append(r)
 
     results.sort(key=lambda x: x["similarity"], reverse=True)

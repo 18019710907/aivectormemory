@@ -26,6 +26,11 @@ def handle_api_request(handler, cm):
             "/api/stats": lambda: get_stats(cm, pdir),
             "/api/tags": lambda: get_tags(cm, params, pdir),
             "/api/projects": lambda: get_projects(cm),
+            "/api/export": lambda: export_memories(cm, params, pdir),
+        },
+        "POST": {
+            "/api/import": lambda: import_memories(handler, cm, pdir),
+            "/api/search": lambda: search_memories(handler, cm, pdir),
         },
         "PUT": {
             "/api/status": lambda: put_status(handler, cm, pdir),
@@ -186,11 +191,7 @@ def get_stats(cm, pdir):
     archived_issues = issue_repo.list_archived()
     status_counts["archived"] = len(archived_issues)
 
-    tag_counts = {}
-    for m in repo.get_all(limit=1000):
-        mtags = json.loads(m.get("tags", "[]")) if isinstance(m.get("tags"), str) else m.get("tags", [])
-        for t in mtags:
-            tag_counts[t] = tag_counts.get(t, 0) + 1
+    tag_counts = repo.get_tag_counts()
 
     return {
         "memories": {"project": proj_count, "user": user_count, "total": total_count},
@@ -202,12 +203,7 @@ def get_stats(cm, pdir):
 def get_tags(cm, params, pdir):
     query = params.get("query", [None])[0]
     repo = MemoryRepo(cm.conn, pdir)
-    all_mems = repo.get_all(limit=10000)
-    tag_counts = {}
-    for m in all_mems:
-        mtags = json.loads(m.get("tags", "[]")) if isinstance(m.get("tags"), str) else m.get("tags", [])
-        for t in mtags:
-            tag_counts[t] = tag_counts.get(t, 0) + 1
+    tag_counts = repo.get_tag_counts()
     tags = [{"name": k, "count": v} for k, v in sorted(tag_counts.items(), key=lambda x: -x[1])]
     if query:
         q = query.lower()
@@ -223,14 +219,13 @@ def rename_tag(handler, cm, pdir):
         return {"error": "old_name and new_name required"}
     repo = MemoryRepo(cm.conn, pdir)
     updated = 0
-    for m in repo.get_all(limit=10000):
+    for m in repo.get_ids_with_tag(old_name):
         tags = json.loads(m["tags"]) if isinstance(m.get("tags"), str) else m.get("tags", [])
-        if old_name in tags:
-            tags = [new_name if t == old_name else t for t in tags]
-            tags = list(dict.fromkeys(tags))  # dedup
-            cm.conn.execute("UPDATE memories SET tags=?, updated_at=? WHERE id=?",
-                            (json.dumps(tags, ensure_ascii=False), repo._now(), m["id"]))
-            updated += 1
+        tags = [new_name if t == old_name else t for t in tags]
+        tags = list(dict.fromkeys(tags))
+        cm.conn.execute("UPDATE memories SET tags=?, updated_at=? WHERE id=?",
+                        (json.dumps(tags, ensure_ascii=False), repo._now(), m["id"]))
+        updated += 1
     cm.conn.commit()
     return {"updated": updated, "old_name": old_name, "new_name": new_name}
 
@@ -243,9 +238,13 @@ def merge_tags(handler, cm, pdir):
         return {"error": "source_tags and target_name required"}
     repo = MemoryRepo(cm.conn, pdir)
     updated = 0
-    for m in repo.get_all(limit=10000):
-        tags = json.loads(m["tags"]) if isinstance(m.get("tags"), str) else m.get("tags", [])
-        if any(t in source_tags for t in tags):
+    seen = set()
+    for src in source_tags:
+        for m in repo.get_ids_with_tag(src):
+            if m["id"] in seen:
+                continue
+            seen.add(m["id"])
+            tags = json.loads(m["tags"]) if isinstance(m.get("tags"), str) else m.get("tags", [])
             tags = [target_name if t in source_tags else t for t in tags]
             tags = list(dict.fromkeys(tags))
             cm.conn.execute("UPDATE memories SET tags=?, updated_at=? WHERE id=?",
@@ -262,13 +261,18 @@ def delete_tags(handler, cm, pdir):
         return {"error": "tags required"}
     repo = MemoryRepo(cm.conn, pdir)
     updated = 0
-    for m in repo.get_all(limit=10000):
-        tags = json.loads(m["tags"]) if isinstance(m.get("tags"), str) else m.get("tags", [])
-        new_tags = [t for t in tags if t not in tag_names]
-        if len(new_tags) != len(tags):
-            cm.conn.execute("UPDATE memories SET tags=?, updated_at=? WHERE id=?",
-                            (json.dumps(new_tags, ensure_ascii=False), repo._now(), m["id"]))
-            updated += 1
+    seen = set()
+    for tn in tag_names:
+        for m in repo.get_ids_with_tag(tn):
+            if m["id"] in seen:
+                continue
+            seen.add(m["id"])
+            tags = json.loads(m["tags"]) if isinstance(m.get("tags"), str) else m.get("tags", [])
+            new_tags = [t for t in tags if t not in tag_names]
+            if len(new_tags) != len(tags):
+                cm.conn.execute("UPDATE memories SET tags=?, updated_at=? WHERE id=?",
+                                (json.dumps(new_tags, ensure_ascii=False), repo._now(), m["id"]))
+                updated += 1
     cm.conn.commit()
     return {"deleted_tags": tag_names, "updated_memories": updated}
 
@@ -318,3 +322,78 @@ def get_projects(cm):
             "tags": len(info["tags"]),
         })
     return {"projects": result}
+
+
+def export_memories(cm, params, pdir):
+    scope = params.get("scope", ["all"])[0]
+    repo = MemoryRepo(cm.conn, pdir)
+    filter_dir = pdir if scope == "project" else (USER_SCOPE_DIR if scope == "user" else None)
+    memories = repo.get_all(limit=999999, project_dir=filter_dir)
+    result = []
+    for m in memories:
+        row = cm.conn.execute("SELECT embedding FROM vec_memories WHERE id=?", (m["id"],)).fetchone()
+        entry = dict(m)
+        if row:
+            raw = row["embedding"]
+            if isinstance(raw, (bytes, memoryview)):
+                import struct
+                entry["embedding"] = list(struct.unpack(f'{len(raw)//4}f', raw))
+            else:
+                entry["embedding"] = json.loads(raw)
+        else:
+            entry["embedding"] = None
+        result.append(entry)
+    return {"memories": result, "count": len(result), "project_dir": pdir}
+
+
+def import_memories(handler, cm, pdir):
+    body = _read_body(handler)
+    items = body.get("memories", [])
+    if not items:
+        return {"error": "no memories to import"}
+    repo = MemoryRepo(cm.conn, pdir)
+    imported, skipped = 0, 0
+    for item in items:
+        mid = item.get("id", "")
+        if not mid or repo.get_by_id(mid):
+            skipped += 1
+            continue
+        now = repo._now()
+        tags = item.get("tags", "[]")
+        tags_str = json.dumps(tags, ensure_ascii=False) if isinstance(tags, list) else tags
+        cm.conn.execute(
+            "INSERT INTO memories (id, content, tags, scope, project_dir, session_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)",
+            (mid, item.get("content", ""), tags_str, item.get("scope", "project"),
+             item.get("project_dir", pdir), item.get("session_id", 0), item.get("created_at", now), now)
+        )
+        embedding = item.get("embedding")
+        if embedding:
+            cm.conn.execute("INSERT INTO vec_memories (id, embedding) VALUES (?,?)", (mid, json.dumps(embedding)))
+        imported += 1
+    cm.conn.commit()
+    return {"imported": imported, "skipped": skipped}
+
+
+def search_memories(handler, cm, pdir):
+    body = _read_body(handler)
+    query = body.get("query", "").strip()
+    if not query:
+        return {"error": "query required"}
+    top_k = body.get("top_k", 20)
+    scope = body.get("scope", "all")
+    tags = body.get("tags", [])
+
+    engine = getattr(cm, "_embedding_engine", None)
+    if not engine:
+        return {"error": "embedding engine not loaded"}
+
+    embedding = engine.encode(query)
+    repo = MemoryRepo(cm.conn, pdir)
+    if tags:
+        results = repo.search_by_vector_with_tags(embedding, tags, top_k=top_k, scope=scope, project_dir=pdir)
+    else:
+        results = repo.search_by_vector(embedding, top_k=top_k, scope=scope, project_dir=pdir)
+
+    for r in results:
+        r["similarity"] = round(1 - (r.get("distance", 0) ** 2) / 2, 4)
+    return {"results": results, "count": len(results), "query": query}

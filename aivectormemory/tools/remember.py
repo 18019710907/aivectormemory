@@ -13,6 +13,8 @@ def handle_remember(args, *, cm, engine, session_id, **_):
         raise ValueError("content is required")
     if not isinstance(tags, list):
         raise ValueError("tags must be a list")
+    if len(content) > 5000:
+        content = content[:5000]
 
     repo = MemoryRepo(cm.conn, cm.project_dir)
     embedding = engine.encode(content)

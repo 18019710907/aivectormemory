@@ -94,6 +94,10 @@ def init_db(conn):
         conn.execute("ALTER TABLE issues_new RENAME TO issues")
     for sql in INDEXES:
         conn.execute(sql)
+    # 迁移：session_state 表加 last_session_id 字段
+    state_cols = {row[1] for row in conn.execute("PRAGMA table_info(session_state)").fetchall()}
+    if "last_session_id" not in state_cols:
+        conn.execute("ALTER TABLE session_state ADD COLUMN last_session_id INTEGER NOT NULL DEFAULT 0")
     # 迁移：user scope 记忆的 project_dir 从空字符串改为 @user@
     conn.execute(
         "UPDATE memories SET project_dir=? WHERE project_dir='' AND scope='user'",

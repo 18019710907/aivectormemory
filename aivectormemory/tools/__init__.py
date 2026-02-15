@@ -32,7 +32,9 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {
                 "memory_id": {"type": "string", "description": "单个记忆 ID"},
-                "memory_ids": {"type": "array", "items": {"type": "string"}, "description": "多个记忆 ID"}
+                "memory_ids": {"type": "array", "items": {"type": "string"}, "description": "多个记忆 ID"},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "按标签批量删除，删除所有匹配标签的记忆"},
+                "scope": {"type": "string", "enum": ["user", "project", "all"], "default": "all", "description": "配合 tags 使用，限定删除范围"}
             }
         }
     },
@@ -83,7 +85,8 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "scope": {"type": "string", "enum": ["user", "project", "all"], "default": "project"},
                 "since_sessions": {"type": "integer", "default": 20, "description": "最近 N 次会话"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "按标签过滤"}
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "按标签过滤"},
+                "compress": {"type": "boolean", "default": False, "description": "是否触发智能归纳压缩，合并同主题碎片、清理过时记忆"}
             }
         }
     },

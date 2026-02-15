@@ -84,6 +84,28 @@ class MemoryRepo:
                 break
         return results
 
+    def search_by_vector_with_tags(self, embedding: list[float], tags: list[str],
+                                    top_k: int = 5, scope: str = "all",
+                                    project_dir: str = "") -> list[dict]:
+        import numpy as np
+        candidates = self.list_by_tags(tags, scope=scope, project_dir=project_dir, limit=1000)
+        if not candidates:
+            return []
+        query_vec = np.array(embedding, dtype=np.float32)
+        final = []
+        for mem in candidates:
+            row = self.conn.execute("SELECT embedding FROM vec_memories WHERE id=?", (mem["id"],)).fetchone()
+            if not row:
+                continue
+            raw = row["embedding"]
+            vec = np.frombuffer(raw, dtype=np.float32) if isinstance(raw, (bytes, memoryview)) else np.array(json.loads(raw), dtype=np.float32)
+            cos_sim = float(np.dot(query_vec, vec) / (np.linalg.norm(query_vec) * np.linalg.norm(vec) + 1e-9))
+            d = dict(mem)
+            d["distance"] = 1 - cos_sim
+            final.append(d)
+        final.sort(key=lambda x: x["distance"])
+        return final[:top_k]
+
     def delete(self, mid: str) -> bool:
         cur = self.conn.execute("DELETE FROM memories WHERE id=?", (mid,))
         self.conn.execute("DELETE FROM vec_memories WHERE id=?", (mid,))
@@ -132,4 +154,24 @@ class MemoryRepo:
             params.append(f'%"{tag}"%')
         sql += " ORDER BY created_at DESC LIMIT ?"
         params.append(limit)
+        return [dict(r) for r in self.conn.execute(sql, params).fetchall()]
+
+    def get_tag_counts(self, project_dir: str | None = None) -> dict[str, int]:
+        if project_dir is not None:
+            rows = self.conn.execute("SELECT tags FROM memories WHERE project_dir=?", (project_dir,)).fetchall()
+        else:
+            rows = self.conn.execute("SELECT tags FROM memories").fetchall()
+        counts = {}
+        for r in rows:
+            tags = json.loads(r["tags"]) if isinstance(r["tags"], str) else (r["tags"] or [])
+            for t in tags:
+                counts[t] = counts.get(t, 0) + 1
+        return counts
+
+    def get_ids_with_tag(self, tag: str, project_dir: str | None = None) -> list[dict]:
+        sql = "SELECT id, tags FROM memories WHERE tags LIKE ?"
+        params = [f'%"{tag}"%']
+        if project_dir is not None:
+            sql += " AND project_dir=?"
+            params.append(project_dir)
         return [dict(r) for r in self.conn.execute(sql, params).fetchall()]

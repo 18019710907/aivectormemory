@@ -29,6 +29,7 @@ def handle_auto_save(args, *, cm, engine, session_id, **_):
         for item in items:
             if not item or not isinstance(item, str):
                 continue
+            item = item[:5000] if len(item) > 5000 else item
             embedding = engine.encode(item)
             tags = [tag] + args.get("extra_tags", [])
             result = repo.insert(item, tags, cat_scope, session_id, embedding, DEDUP_THRESHOLD)
