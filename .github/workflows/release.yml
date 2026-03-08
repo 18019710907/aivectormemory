@@ -201,11 +201,9 @@ jobs:
       - name: List artifacts
         run: find artifacts -type f -ls
 
-      - name: Publish Release to public repo
+      - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          repository: Edlineas/aivectormemory
-          token: ${{ secrets.PUBLIC_REPO_TOKEN }}
           tag_name: ${{ steps.version.outputs.tag }}
           name: "AIVectorMemory ${{ steps.version.outputs.tag }}"
           draft: false
