@@ -245,7 +245,7 @@ run web --port 9080 --quiet          # 屏蔽请求日志
 run web --port 9080 --quiet --daemon  # 后台运行（macOS/Linux）
 ```
 
-浏览器访问 `http://localhost:9080`
+浏览器访问 `http://localhost:9080`，默认用户名 `admin`，密码 `admin123`（首次登录后可在设置中修改）。
 
 - 多项目切换，记忆浏览/搜索/编辑/删除/导出/导入
 - 语义搜索（向量相似度匹配）
