@@ -41,3 +41,7 @@ tests/screenshots/
 # Root screenshots & Playwright MCP
 *.png
 .playwright-mcp/
+
+# Local-only directories (specs, tests, design docs)
+docs/
+tests/
