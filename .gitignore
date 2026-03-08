@@ -39,9 +39,10 @@ htmlcov/
 tests/screenshots/
 
 # Root screenshots & Playwright MCP
-*.png
+/*.png
 .playwright-mcp/
 
 # Local-only directories (specs, tests, design docs)
-docs/
+docs/design/
+docs/specs/
 tests/
