@@ -271,7 +271,7 @@ async function confirmDelete() {
 }
 
 .project-card {
-  background: rgba(30,41,59,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-radius: 16px; padding: 28px 24px; border: 1px solid var(--border-light);
   cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   position: relative; overflow: hidden;
@@ -283,18 +283,18 @@ async function confirmDelete() {
 }
 .project-card::after {
   content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(59,130,246,0.04) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 30%, var(--accent-bg-subtle) 0%, transparent 50%);
   pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
 }
 .project-card:hover {
-  border-color: rgba(59,130,246,0.4); transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(59,130,246,0.1), inset 0 1px 0 rgba(255,255,255,0.03);
+  border-color: var(--accent); transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 0 1px var(--accent-bg-light), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 .project-card:hover::before { opacity: 1; }
 .project-card:hover::after { opacity: 1; }
 .project-card__icon {
   width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
+  background: linear-gradient(135deg, var(--accent-bg), var(--color-purple-bg));
   display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
 }
 .project-card__icon svg { width: 20px; height: 20px; color: var(--accent-light); }
@@ -323,10 +323,10 @@ async function confirmDelete() {
 
 .project-card--add {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border: 2px dashed rgba(99,102,241,0.3); background: rgba(30,41,59,0.3); min-height: 180px;
+  border: 2px dashed var(--color-purple-bg); background: transparent; min-height: 180px;
 }
-.project-card--add:hover { border-color: rgba(99,102,241,0.6); background: rgba(30,41,59,0.5); }
-.project-card__icon--add { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); }
+.project-card--add:hover { border-color: var(--color-purple); background: var(--bg-hover); }
+.project-card__icon--add { background: linear-gradient(135deg, var(--color-purple-bg), var(--color-purple-bg)); }
 .project-card__icon--add svg { color: var(--color-purple); }
 
 /* Add project form */
@@ -336,19 +336,19 @@ async function confirmDelete() {
   flex: 1; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius);
   padding: 10px 14px; color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; outline: none;
 }
-.add-project-input-row input:focus { border-color: rgba(99,102,241,0.5); }
+.add-project-input-row input:focus { border-color: var(--color-purple); }
 .btn-browse {
-  background: rgba(99,102,241,0.15); color: var(--color-purple); border: 1px solid rgba(99,102,241,0.3);
+  background: var(--color-purple-bg); color: var(--color-purple); border: 1px solid var(--color-purple-bg);
   border-radius: var(--radius); padding: 10px 16px; cursor: pointer; font-size: 13px; white-space: nowrap;
   transition: all var(--transition-fast);
 }
-.btn-browse:hover { background: rgba(99,102,241,0.25); border-color: rgba(99,102,241,0.5); }
+.btn-browse:hover { background: hsl(270 76% 60% / 0.25); border-color: var(--color-purple); }
 
 .dir-browser { margin-top: 12px; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius); overflow: hidden; }
 .dir-browser__path { padding: 8px 14px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--border-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dir-browser__list { max-height: 240px; overflow-y: auto; }
 .dir-browser__item { padding: 8px 14px; font-size: 13px; color: var(--text-heading); cursor: pointer; transition: background 0.1s; display: flex; align-items: center; gap: 6px; }
-.dir-browser__item:hover { background: rgba(99,102,241,0.1); }
+.dir-browser__item:hover { background: var(--color-purple-bg); }
 .dir-browser__item--parent { color: var(--color-purple); font-size: 12px; border-bottom: 1px solid var(--border-light); }
 
 /* Welcome guide */

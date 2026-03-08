@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - Reglas de Flujo de Trabajo
 
 ## 1. Inicio de Nueva Sesión (ejecutar en orden obligatorio)
 
-1. `recall` (tags: ["conocimiento del proyecto"], scope: "project", top_k: 100) cargar conocimiento del proyecto
-2. `recall` (tags: ["preference"], scope: "user", top_k: 20) cargar preferencias del usuario
+1. `recall` (tags: ["conocimiento del proyecto"], scope: "project", top_k: 10) cargar conocimiento del proyecto
+2. `recall` (tags: ["preference"], scope: "user", top_k: 10) cargar preferencias del usuario
 3. `status` (sin parámetro state) leer estado de sesión
 4. Si bloqueado (is_blocked=true) → reportar estado de bloqueo, esperar retroalimentación del usuario, **ninguna acción permitida**
 5. Si no bloqueado → proceder al "Flujo de Procesamiento de Mensajes"
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - Reglas de Flujo de Trabajo
 
 ## 9. Estándares de Desarrollo
 
-**Idioma**: **Siempre responder en español**, independientemente del idioma del contexto (incluyendo después de compact/context transfer)
-
 **Estilo de código**: concisión primero, operador ternario > if-else, evaluación de cortocircuito > condicional, template strings > concatenación, sin comentarios innecesarios
 
 **Flujo de trabajo Git**: trabajo diario en rama `dev`, nunca hacer commit directamente a master. Solo hacer commit cuando el usuario lo solicite explícitamente. Flujo de commit: confirmar rama dev (`git branch --show-current`) → `git add -A` → `git commit -m "fix: descripción breve"` → `git push origin dev`. Merge a master solo cuando el usuario lo solicite explícitamente.
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - Reglas de Flujo de Trabajo
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ Inicialización del Sistema de Memoria (DEBE ejecutarse primero en nueva sesión)\n\n"
+    "Si esta sesión aún no ha ejecutado la inicialización recall + status, **DEBE ejecutar los siguientes pasos primero. NO procesar solicitudes del usuario hasta completar**:\n"
+    "1. `recall`(tags: [\"项目知识\"], scope: \"project\", top_k: 10) — cargar conocimiento del proyecto\n"
+    "2. `recall`(tags: [\"preference\"], scope: \"user\", top_k: 10) — cargar preferencias del usuario\n"
+    "3. `status`(sin parámetro state) — leer estado de sesión\n"
+    "4. Bloqueado → reportar estado de bloqueo, esperar feedback del usuario\n"
+    "5. No bloqueado → proceder a procesar mensaje del usuario\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role: Eres un Ingeniero Jefe y Científico de Datos Senior\n"
     "- Language: **Siempre responder en español**, independientemente del idioma del contexto (incluyendo después de compact/context transfer)\n"

@@ -99,3 +99,11 @@ export function UpdateMemory(arg1:string,arg2:string,arg3:Array<string>,arg4:str
 export function UpdateStatus(arg1:string,arg2:string,arg3:Array<string>):Promise<db.SessionState>;
 
 export function UpdateTask(arg1:number,arg2:string,arg3:string):Promise<db.Task>;
+
+export function GetCurrentUser(arg1:string):Promise<Record<string, string>>;
+
+export function Login(arg1:string,arg2:string):Promise<Record<string, string>>;
+
+export function Logout(arg1:string):Promise<void>;
+
+export function Register(arg1:string,arg2:string):Promise<void>;

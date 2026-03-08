@@ -188,12 +188,12 @@ async function removeListItem(field: string, index: number) {
 .status-view { display: flex; flex-direction: column; flex: 1; }
 .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
 .status-field {
-  background: var(--bg-surface); border-radius: var(--radius-md); padding: 16px 20px;
-  border: 1px solid var(--border);
+  background: var(--bg-primary); border-radius: var(--radius-sm); padding: 12px;
+  
 }
 .status-field__label {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-muted); margin-bottom: 2px;
 }
 .status-field__value {
   display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-primary);
@@ -203,13 +203,13 @@ async function removeListItem(field: string, index: number) {
 .status-list-section { margin-bottom: 20px; }
 .status-list-title {
   font-family: var(--font-mono); font-size: 12px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
+  color: var(--text-muted); margin-bottom: 2px;
 }
 .status-list { list-style: none; padding: 0; }
 .status-list li {
   display: flex; justify-content: space-between; align-items: center;
   padding: 8px 12px; font-size: 13px; color: var(--text-heading);
-  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-surface);  border-radius: var(--radius);
   margin-bottom: 4px;
 }
 .status-list-add { display: flex; gap: 8px; margin-top: 8px; }

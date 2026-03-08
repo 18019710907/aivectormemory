@@ -70,4 +70,10 @@ export default {
   launchWebDashboard: 'Lancer le Tableau de Bord Web', stopWebDashboard: 'Arreter le Tableau de Bord Web',
   webDashboardRunning: 'Tableau de Bord Web en Cours', webDashboardStopped: 'Tableau de Bord Web Arrete',
   selectAll: 'Tout Selectionner', batchDeleteMemories: 'Suppression Groupee', confirmBatchDelete: 'Supprimer {n} memoires selectionnees ?',
+  auth: {
+    login: 'Connexion', loginDesc: 'Connectez-vous a votre compte AIVectorMemory', createAccount: 'Creer un Compte', createAccountDesc: 'Enregistrer un nouveau compte AIVectorMemory',
+    register: "S'inscrire", username: "Nom d'utilisateur", usernamePlaceholder: "Entrez le nom d'utilisateur", password: 'Mot de passe', passwordPlaceholder: 'Entrez le mot de passe',
+    confirmPassword: 'Confirmer le Mot de passe', confirmPasswordPlaceholder: 'Entrez le mot de passe a nouveau', fieldsRequired: 'Tous les champs sont requis',
+    passwordTooShort: 'Le mot de passe doit avoir au moins 6 caracteres', passwordMismatch: 'Les mots de passe ne correspondent pas', noAccount: 'Pas de compte ?', hasAccount: 'Deja un compte ?', logout: 'Deconnexion',
+  },
 }

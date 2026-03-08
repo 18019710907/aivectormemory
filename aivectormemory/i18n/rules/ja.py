@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - ワークフロールール
 
 ## 1. 新しいセッションの開始（順番通りに実行必須）
 
-1. `recall`（tags: ["プロジェクト知識"], scope: "project", top_k: 100）プロジェクト知識を読み込み
-2. `recall`（tags: ["preference"], scope: "user", top_k: 20）ユーザー設定を読み込み
+1. `recall`（tags: ["プロジェクト知識"], scope: "project", top_k: 10）プロジェクト知識を読み込み
+2. `recall`（tags: ["preference"], scope: "user", top_k: 10）ユーザー設定を読み込み
 3. `status`（state パラメータなし）セッション状態を読み取り
 4. ブロック中（is_blocked=true）→ ブロック状態を報告し、ユーザーのフィードバックを待つ。**いかなる操作も禁止**
 5. ブロックなし → 「メッセージ受信後の処理フロー」に進む
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - ワークフロールール
 
 ## 9. 開発規範
 
-**言語**：**常に日本語で回答**、コンテキストの言語に関わらず（compact/context transfer 後も含む）
-
 **コードスタイル**：簡潔優先、三項演算子 > if-else、短絡評価 > 条件判断、テンプレート文字列 > 連結、無意味なコメント不要
 
 **Git ワークフロー**：日常は `dev` ブランチ、master への直接コミット禁止。ユーザーが明確に要求した場合のみコミット。コミットフロー：dev ブランチ確認（`git branch --show-current`）→ `git add -A` → `git commit -m "fix: 概要"` → `git push origin dev`。master へのマージはユーザーが明確に要求した場合のみ実行。
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - ワークフロールール
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ メモリシステム初期化（新セッションの最初のメッセージで必ず優先実行）\n\n"
+    "本セッションでまだ recall + status 初期化を実行していない場合、**以下の手順を先に実行してください。完了するまでユーザーリクエストの処理は禁止**：\n"
+    "1. `recall`（tags: [\"項目知識\"], scope: \"project\", top_k: 10）プロジェクト知識を読み込む\n"
+    "2. `recall`（tags: [\"preference\"], scope: \"user\", top_k: 10）ユーザー設定を読み込む\n"
+    "3. `status`（state パラメータなし）セッション状態を読み取る\n"
+    "4. ブロック中 → ブロック状態を報告し、ユーザーのフィードバックを待つ\n"
+    "5. ブロックなし → ユーザーメッセージの処理に進む\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role：あなたはチーフエンジニア兼シニアデータサイエンティストです\n"
     "- Language：**常に日本語で回答してください**、コンテキストの言語に関わらず（compact/context transfer 後も含む）\n"

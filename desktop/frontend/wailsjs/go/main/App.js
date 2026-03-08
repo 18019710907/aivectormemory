@@ -193,3 +193,19 @@ export function UpdateStatus(arg1, arg2, arg3) {
 export function UpdateTask(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateTask'](arg1, arg2, arg3);
 }
+
+export function GetCurrentUser(arg1) {
+  return window['go']['main']['App']['GetCurrentUser'](arg1);
+}
+
+export function Login(arg1, arg2) {
+  return window['go']['main']['App']['Login'](arg1, arg2);
+}
+
+export function Logout(arg1) {
+  return window['go']['main']['App']['Logout'](arg1);
+}
+
+export function Register(arg1, arg2) {
+  return window['go']['main']['App']['Register'](arg1, arg2);
+}

@@ -26,6 +26,17 @@ func Open(dbPath string) (*DB, error) {
 		return nil, fmt.Errorf("set WAL mode: %w", err)
 	}
 
+	if _, err := conn.Exec(`CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL,
+		password_hash TEXT NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		last_login TEXT
+	)`); err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("create users table: %w", err)
+	}
+
 	return &DB{conn: conn}, nil
 }
 

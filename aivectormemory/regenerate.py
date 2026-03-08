@@ -6,7 +6,7 @@ from pathlib import Path
 from aivectormemory.settings import set_language, SUPPORTED_LANGS
 from aivectormemory.install import (
     IDES, STEERING_MARKER, PER_MSG_INJECTION_IDES, SPECS_PATH_MAP, SPECS_PATH_DEFAULT,
-    _write_steering, _write_inject_workflow_script,
+    _write_steering,
     _write_hooks, _write_claude_code_hooks, _write_cursor_hooks,
     _write_windsurf_hooks, _write_opencode_plugins,
 )
@@ -67,7 +67,7 @@ def regenerate_project(project_dir: str, lang: str) -> list[str]:
             if hooks_dir_str.endswith(".opencode/plugins"):
                 hook_results = _write_opencode_plugins(hooks_dir, lang=lang)
             elif hooks_dir_str.endswith(".claude"):
-                hook_results = _write_claude_code_hooks(hooks_dir)
+                hook_results = _write_claude_code_hooks(hooks_dir, lang=lang)
             elif hooks_dir_str.endswith(".cursor"):
                 hook_results = _write_cursor_hooks(hooks_dir)
             elif hooks_dir_str.endswith(".windsurf"):

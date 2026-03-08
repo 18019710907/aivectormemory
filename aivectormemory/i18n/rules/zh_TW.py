@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - 工作規則
 
 ## 1. 新會話啟動（必須按順序執行）
 
-1. `recall`（tags: ["專案知識"], scope: "project", top_k: 100）載入專案知識
-2. `recall`（tags: ["preference"], scope: "user", top_k: 20）載入使用者偏好
+1. `recall`（tags: ["專案知識"], scope: "project", top_k: 10）載入專案知識
+2. `recall`（tags: ["preference"], scope: "user", top_k: 10）載入使用者偏好
 3. `status`（不傳 state）讀取會話狀態
 4. 有阻塞（is_blocked=true）→ 匯報阻塞狀態，等待使用者回饋，**禁止執行任何操作**
 5. 無阻塞 → 進入「收到訊息後的處理流程」
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - 工作規則
 
 ## 9. 開發規範
 
-**語言**：**始終使用繁體中文回覆**，無論上下文語言如何（含 compact/context transfer 後）
-
 **程式碼風格**：簡潔優先，三元運算子 > if-else，短路求值 > 條件判斷，模板字串 > 拼接，不寫無意義註解
 
 **Git 工作流**：日常在 `dev` 分支，禁止直接在 master 提交。只有使用者明確要求時才提交。提交流程：確認 dev 分支（`git branch --show-current`）→ `git add -A` → `git commit -m "fix: 簡述"` → `git push origin dev`。合併到 master 僅使用者明確要求時執行。
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - 工作規則
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ 記憶系統初始化（新會話首條訊息必須優先執行）\n\n"
+    "如果本會話尚未執行過 recall + status 初始化，**必須先執行以下步驟，完成前禁止處理使用者請求**：\n"
+    "1. `recall`（tags: [\"項目知識\"], scope: \"project\", top_k: 10）載入項目知識\n"
+    "2. `recall`（tags: [\"preference\"], scope: \"user\", top_k: 10）載入使用者偏好\n"
+    "3. `status`（不傳 state）讀取會話狀態\n"
+    "4. 有阻塞 → 匯報阻塞狀態，等待使用者反饋\n"
+    "5. 無阻塞 → 再處理使用者訊息\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role：你是首席工程師兼高級資料科學家\n"
     "- Language：**始終使用繁體中文回覆**，無論上下文語言如何（含 compact/context transfer 後）\n"

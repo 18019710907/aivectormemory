@@ -70,4 +70,10 @@ export default {
   launchWebDashboard: 'Iniciar Panel Web', stopWebDashboard: 'Detener Panel Web',
   webDashboardRunning: 'Panel Web en Ejecucion', webDashboardStopped: 'Panel Web Detenido',
   selectAll: 'Seleccionar Todo', batchDeleteMemories: 'Eliminacion Masiva', confirmBatchDelete: 'Eliminar {n} memorias seleccionadas?',
+  auth: {
+    login: 'Iniciar Sesion', loginDesc: 'Inicie sesion en su cuenta AIVectorMemory', createAccount: 'Crear Cuenta', createAccountDesc: 'Registrar una nueva cuenta AIVectorMemory',
+    register: 'Registrarse', username: 'Nombre de usuario', usernamePlaceholder: 'Ingrese nombre de usuario', password: 'Contrasena', passwordPlaceholder: 'Ingrese contrasena',
+    confirmPassword: 'Confirmar Contrasena', confirmPasswordPlaceholder: 'Ingrese contrasena nuevamente', fieldsRequired: 'Todos los campos son obligatorios',
+    passwordTooShort: 'La contrasena debe tener al menos 6 caracteres', passwordMismatch: 'Las contrasenas no coinciden', noAccount: 'No tiene cuenta?', hasAccount: 'Ya tiene cuenta?', logout: 'Cerrar Sesion',
+  },
 }

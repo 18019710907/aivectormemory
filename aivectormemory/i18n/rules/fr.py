@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - Règles de Flux de Travail
 
 ## 1. Démarrage de Nouvelle Session (exécuter dans l'ordre obligatoire)
 
-1. `recall` (tags: ["connaissance du projet"], scope: "project", top_k: 100) charger les connaissances du projet
-2. `recall` (tags: ["preference"], scope: "user", top_k: 20) charger les préférences utilisateur
+1. `recall` (tags: ["connaissance du projet"], scope: "project", top_k: 10) charger les connaissances du projet
+2. `recall` (tags: ["preference"], scope: "user", top_k: 10) charger les préférences utilisateur
 3. `status` (sans paramètre state) lire l'état de session
 4. Si bloqué (is_blocked=true) → signaler l'état de blocage, attendre le retour de l'utilisateur, **aucune action autorisée**
 5. Si non bloqué → passer au « Flux de Traitement des Messages »
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - Règles de Flux de Travail
 
 ## 9. Standards de Développement
 
-**Langue** : **Toujours répondre en français**, quelle que soit la langue du contexte (y compris après compact/context transfer)
-
 **Style de code** : concision d'abord, opérateur ternaire > if-else, évaluation court-circuit > conditionnel, template strings > concaténation, pas de commentaires inutiles
 
 **Flux de travail Git** : travail quotidien sur la branche `dev`, ne jamais commit directement sur master. Ne commit que lorsque l'utilisateur le demande explicitement. Flux de commit : confirmer la branche dev (`git branch --show-current`) → `git add -A` → `git commit -m "fix: description brève"` → `git push origin dev`. Merge vers master uniquement lorsque l'utilisateur le demande explicitement.
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - Règles de Flux de Travail
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ Initialisation du Système de Mémoire (DOIT être exécuté en premier dans une nouvelle session)\n\n"
+    "Si cette session n'a pas encore exécuté l'initialisation recall + status, **vous DEVEZ exécuter les étapes suivantes en premier. NE PAS traiter les demandes de l'utilisateur avant la fin**:\n"
+    "1. `recall`(tags: [\"项目知识\"], scope: \"project\", top_k: 10) — charger les connaissances du projet\n"
+    "2. `recall`(tags: [\"preference\"], scope: \"user\", top_k: 10) — charger les préférences utilisateur\n"
+    "3. `status`(sans paramètre state) — lire l'état de session\n"
+    "4. Bloqué → signaler l'état de blocage, attendre le retour de l'utilisateur\n"
+    "5. Non bloqué → procéder au traitement du message utilisateur\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role : Vous êtes un Ingénieur en Chef et Scientifique des Données Senior\n"
     "- Language : **Toujours répondre en français**, quelle que soit la langue du contexte (y compris après compact/context transfer)\n"

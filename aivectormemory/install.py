@@ -200,28 +200,15 @@ def _build_claude_code_hooks(check_script_path: str, inject_script_path: str) ->
     return cfg
 
 
-def _write_inject_workflow_script(target_dir: Path) -> tuple[Path, bool]:
-    """生成 inject-workflow-rules.sh，读取 settings.json 语言并输出对应 workflow prompt"""
-    from aivectormemory.settings import SUPPORTED_LANGS, DEFAULT_LANG
+def _write_inject_workflow_script(target_dir: Path, lang: str | None = None) -> tuple[Path, bool]:
+    """生成 inject-workflow-rules.sh，只包含指定语言的 workflow prompt（直接 cat 输出）"""
+    from aivectormemory.settings import get_language
+    if lang is None:
+        lang = get_language()
     target_dir.mkdir(parents=True, exist_ok=True)
     dst = target_dir / "inject-workflow-rules.sh"
-    # 生成 case 分支：根据 settings.json 的 language 字段动态输出对应语言
-    parts = ['#!/bin/bash', 'SETTINGS_FILE="$HOME/.aivectormemory/settings.json"']
-    parts.append('LANG=$(python3 -c "import json,pathlib;p=pathlib.Path(\'$SETTINGS_FILE\');print(json.loads(p.read_text()).get(\'language\',\'\') if p.exists() else \'\')" 2>/dev/null)')
-    parts.append('case "$LANG" in')
-    for lang in SUPPORTED_LANGS:
-        prompt = get_workflow_prompt(lang)
-        parts.append(f'  {lang})')
-        parts.append(f"    cat <<'AIVECTORMEMORY_EOF'")
-        parts.append(prompt)
-        parts.append("AIVECTORMEMORY_EOF")
-        parts.append("    ;;")
-    parts.append("  *)")
-    parts.append(f"    cat <<'AIVECTORMEMORY_EOF'")
-    parts.append(get_workflow_prompt(DEFAULT_LANG))
-    parts.append("AIVECTORMEMORY_EOF")
-    parts.append("    ;;")
-    parts.append("esac")
+    prompt = get_workflow_prompt(lang)
+    parts = ["#!/bin/bash", "cat <<'AIVECTORMEMORY_EOF'", prompt, "AIVECTORMEMORY_EOF"]
     content = "\n".join(parts) + "\n"
     if dst.exists() and dst.read_text("utf-8") == content:
         return dst, False
@@ -230,7 +217,7 @@ def _write_inject_workflow_script(target_dir: Path) -> tuple[Path, bool]:
     return dst, True
 
 
-def _write_claude_code_hooks(hooks_dir: Path) -> list[str]:
+def _write_claude_code_hooks(hooks_dir: Path, lang: str | None = None) -> list[str]:
     """写入 Claude Code hooks 到 .claude/settings.json"""
     results = []
     hooks_dir.mkdir(parents=True, exist_ok=True)
@@ -239,7 +226,7 @@ def _write_claude_code_hooks(hooks_dir: Path) -> list[str]:
     check_path, check_changed = _copy_check_track_script(script_dir)
     results.append(f"{'✓ 已同步' if check_changed else '- 无变更'}  Script: .claude/hooks/check_track.sh")
     # 生成 inject-workflow-rules.sh
-    inject_path, inject_changed = _write_inject_workflow_script(script_dir)
+    inject_path, inject_changed = _write_inject_workflow_script(script_dir, lang=lang)
     results.append(f"{'✓ 已同步' if inject_changed else '- 无变更'}  Script: .claude/hooks/inject-workflow-rules.sh")
     # 构建配置
     new_hooks_cfg = _build_claude_code_hooks(str(check_path), str(inject_path))

@@ -14,7 +14,7 @@ def _sync_tasks_md(project_dir: str, feature_id: str, title: str, completed: boo
     old = "- [ ]" if completed else "- [x]"
     new = "- [x]" if completed else "- [ ]"
     # 优先按任务编号前缀匹配（如 "5.1"），回退到全标题精确匹配
-    num_match = re.match(r'^(\d+\.\d+)\s', title)
+    num_match = re.match(r'^(\d+(?:\.\d+)+)\s', title)
     if num_match:
         prefix = re.escape(num_match.group(1))
         pattern = re.compile(rf"^- \[[ x]\] {prefix}\s.*$", re.MULTILINE)

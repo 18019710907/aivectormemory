@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow Rules
 
 ## 1. New Session Startup (must execute in order)
 
-1. `recall` (tags: ["project knowledge"], scope: "project", top_k: 100) to load project knowledge
-2. `recall` (tags: ["preference"], scope: "user", top_k: 20) to load user preferences
+1. `recall` (tags: ["project knowledge"], scope: "project", top_k: 10) to load project knowledge
+2. `recall` (tags: ["preference"], scope: "user", top_k: 10) to load user preferences
 3. `status` (no state param) to read session state
 4. If blocked (is_blocked=true) → report blocking status, wait for user feedback, **no actions allowed**
 5. If not blocked → proceed to "Message Processing Flow"
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow Rules
 
 ## 9. Development Standards
 
-**Language**: **Always reply in English**, regardless of context language (including after compact/context transfer)
-
 **Code style**: concise first, ternary operator > if-else, short-circuit evaluation > conditional, template strings > concatenation, no meaningless comments
 
 **Git workflow**: daily work on `dev` branch, never commit directly to master. Only commit when user explicitly requests. Commit flow: confirm dev branch (`git branch --show-current`) → `git add -A` → `git commit -m "fix: brief description"` → `git push origin dev`. Merge to master only when user explicitly requests.
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow Rules
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ Memory System Initialization (MUST execute first on new session)\n\n"
+    "If this session has not yet executed recall + status initialization, **you MUST execute the following steps first. Do NOT process user requests until complete**:\n"
+    "1. `recall`(tags: [\"项目知识\"], scope: \"project\", top_k: 10) — load project knowledge\n"
+    "2. `recall`(tags: [\"preference\"], scope: \"user\", top_k: 10) — load user preferences\n"
+    "3. `status`(no state param) — read session state\n"
+    "4. Blocked → report blocking status, wait for user feedback\n"
+    "5. Not blocked → proceed to process user message\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role: You are a Chief Engineer and Senior Data Scientist\n"
     "- Language: **Always reply in English**, regardless of context language (including after compact/context transfer)\n"

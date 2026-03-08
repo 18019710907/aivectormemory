@@ -11,6 +11,7 @@ import (
 
 	"os/exec"
 
+	"desktop/internal/auth"
 	"desktop/internal/backup"
 	"desktop/internal/db"
 	"desktop/internal/embedding"
@@ -26,6 +27,7 @@ type App struct {
 	engine    *embedding.Engine
 	settings  *settings.Settings
 	launcher  *webserver.Launcher
+	auth      *auth.Manager
 }
 
 func NewApp() *App {
@@ -52,6 +54,9 @@ func (a *App) startup(ctx context.Context) {
 
 	// Initialize embedding engine
 	a.engine = embedding.NewEngine(a.settings.PythonPath)
+
+	// Initialize auth manager
+	a.auth = auth.NewManager(d)
 
 	// Initialize web launcher
 	a.launcher = webserver.NewLauncher(a.engine.PythonPath, a.settings.WebPort)
@@ -439,6 +444,33 @@ func (a *App) GetPythonPath() string {
 
 func (a *App) DetectPython() string {
 	return embedding.DetectPython()
+}
+
+// ============== Auth ==============
+
+func (a *App) Register(username, password string) error {
+	return a.auth.Register(username, password)
+}
+
+func (a *App) Login(username, password string) (map[string]string, error) {
+	token, err := a.auth.Login(username, password)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{"token": token, "username": username}, nil
+}
+
+func (a *App) Logout(token string) error {
+	a.auth.Logout(token)
+	return nil
+}
+
+func (a *App) GetCurrentUser(token string) (map[string]string, error) {
+	username, err := a.auth.Verify(token)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{"username": username}, nil
 }
 
 func expandHome(path string) string {

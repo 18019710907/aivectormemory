@@ -70,4 +70,10 @@ export default {
   launchWebDashboard: 'Webダッシュボードを起動', stopWebDashboard: 'Webダッシュボードを停止',
   webDashboardRunning: 'Webダッシュボード稼働中', webDashboardStopped: 'Webダッシュボード停止中',
   selectAll: 'すべて選択', batchDeleteMemories: '一括削除', confirmBatchDelete: '選択した {n} 件の記憶を削除しますか？',
+  auth: {
+    login: 'ログイン', loginDesc: 'AIVectorMemory アカウントにログイン', createAccount: 'アカウント作成', createAccountDesc: '新しい AIVectorMemory アカウントを登録',
+    register: '登録', username: 'ユーザー名', usernamePlaceholder: 'ユーザー名を入力', password: 'パスワード', passwordPlaceholder: 'パスワードを入力',
+    confirmPassword: 'パスワード確認', confirmPasswordPlaceholder: 'パスワードを再入力', fieldsRequired: 'すべての項目を入力してください',
+    passwordTooShort: 'パスワードは6文字以上', passwordMismatch: 'パスワードが一致しません', noAccount: 'アカウントをお持ちでない方', hasAccount: 'アカウントをお持ちの方', logout: 'ログアウト',
+  },
 }

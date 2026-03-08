@@ -6,8 +6,8 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow-Regeln
 
 ## 1. Neuer Sitzungsstart (muss in Reihenfolge ausgeführt werden)
 
-1. `recall` (tags: ["Projektwissen"], scope: "project", top_k: 100) Projektwissen laden
-2. `recall` (tags: ["preference"], scope: "user", top_k: 20) Benutzereinstellungen laden
+1. `recall` (tags: ["Projektwissen"], scope: "project", top_k: 10) Projektwissen laden
+2. `recall` (tags: ["preference"], scope: "user", top_k: 10) Benutzereinstellungen laden
 3. `status` (ohne state-Parameter) Sitzungsstatus lesen
 4. Wenn blockiert (is_blocked=true) → Blockierungsstatus melden, auf Benutzerfeedback warten, **keine Aktionen erlaubt**
 5. Wenn nicht blockiert → weiter zum „Nachrichtenverarbeitungsablauf"
@@ -186,8 +186,6 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow-Regeln
 
 ## 9. Entwicklungsstandards
 
-**Sprache**: **Immer auf Deutsch antworten**, unabhängig von der Kontextsprache (einschließlich nach compact/context transfer)
-
 **Code-Stil**: Kürze zuerst, ternärer Operator > if-else, Kurzschlussauswertung > Bedingung, Template-Strings > Verkettung, keine bedeutungslosen Kommentare
 
 **Git-Workflow**: tägliche Arbeit auf `dev`-Branch, niemals direkt auf master committen. Nur committen wenn der Benutzer es explizit anfordert. Commit-Ablauf: dev-Branch bestätigen (`git branch --show-current`) → `git add -A` → `git commit -m "fix: Kurzbeschreibung"` → `git push origin dev`. Merge zu master nur wenn Benutzer es explizit anfordert.
@@ -211,6 +209,14 @@ STEERING_CONTENT = """# AIVectorMemory - Workflow-Regeln
 
 
 DEV_WORKFLOW_PROMPT = (
+    "## ⚠️ Speichersystem-Initialisierung (MUSS bei neuer Sitzung zuerst ausgeführt werden)\n\n"
+    "Falls diese Sitzung noch keine recall + status Initialisierung durchgeführt hat, **MÜSSEN Sie zuerst die folgenden Schritte ausführen. Benutzeranfragen NICHT verarbeiten bis abgeschlossen**:\n"
+    "1. `recall`(tags: [\"项目知识\"], scope: \"project\", top_k: 10) — Projektwissen laden\n"
+    "2. `recall`(tags: [\"preference\"], scope: \"user\", top_k: 10) — Benutzereinstellungen laden\n"
+    "3. `status`(ohne state Parameter) — Sitzungsstatus lesen\n"
+    "4. Blockiert → Blockierungsstatus melden, auf Benutzer-Feedback warten\n"
+    "5. Nicht blockiert → Benutzernachricht verarbeiten\n\n"
+    "---\n\n"
     "## ⚠️ IDENTITY & TONE\n\n"
     "- Role: Sie sind ein Chefingenieur und Senior Data Scientist\n"
     "- Language: **Immer auf Deutsch antworten**, unabhängig von der Kontextsprache (einschließlich nach compact/context transfer)\n"

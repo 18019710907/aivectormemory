@@ -16,6 +16,7 @@ interface Card {
   label: string
   num: number
   cls: string
+  sub?: string
   type: 'memories' | 'issues'
   scope?: string
   status?: string
@@ -26,11 +27,9 @@ function getCards(): Card[] {
   const iss = props.issues || {}
   return [
     { label: t('projectMemories'), num: mem.project || 0, cls: 'blue', type: 'memories', scope: 'project' },
-    { label: t('globalMemories'), num: mem.user || 0, cls: 'cyan', type: 'memories', scope: 'user' },
-    { label: t('status.pending'), num: iss.pending || 0, cls: 'warning', type: 'issues', status: 'pending' },
-    { label: t('status.in_progress'), num: iss.in_progress || 0, cls: 'info', type: 'issues', status: 'in_progress' },
-    { label: t('status.completed'), num: iss.completed || 0, cls: 'success', type: 'issues', status: 'completed' },
-    { label: t('status.archived'), num: iss.archived || 0, cls: 'muted', type: 'issues', status: 'archived' },
+    { label: t('globalMemories'), num: mem.user || 0, cls: 'purple', type: 'memories', scope: 'user' },
+    { label: t('status.pending'), num: iss.pending || 0, cls: 'orange', sub: `${iss.in_progress || 0} ${t('status.in_progress')}`, type: 'issues', status: 'pending' },
+    { label: t('status.completed'), num: iss.completed || 0, cls: 'green', sub: `${iss.archived || 0} ${t('status.archived')}`, type: 'issues', status: 'completed' },
   ]
 }
 
@@ -44,35 +43,35 @@ function onCardClick(card: Card) {
     <div
       v-for="card in getCards()"
       :key="card.label"
-      :class="['mini-card', `mini-card--${card.cls}`]"
+      :class="['stat-card', 'glass-card']"
       @click="onCardClick(card)"
     >
-      <div class="mini-card__label">{{ card.label }}</div>
-      <div class="mini-card__number">{{ card.num }}</div>
+      <div class="stat-label">{{ card.label }}</div>
+      <div :class="['stat-value', card.cls]">{{ card.num }}</div>
+      <div v-if="card.sub" class="stat-sub">{{ card.sub }}</div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-.mini-card {
-  background: var(--bg-surface); border-radius: var(--radius-lg); padding: 20px;
-  border: 1px solid var(--border); transition: all 0.2s ease; cursor: pointer; text-align: center;
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { padding: 16px; cursor: pointer; transition: all 0.2s ease; }
+.stat-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
-.mini-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-card-hover); }
-.mini-card__label {
-  font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px;
-}
-.mini-card__number { font-family: var(--font-mono); font-size: var(--font-size-2xl); font-weight: 700; line-height: 1; }
-.mini-card--blue .mini-card__number { color: var(--accent); }
-.mini-card--cyan .mini-card__number { color: var(--color-cyan); }
-.mini-card--warning .mini-card__number { color: var(--color-warning); }
-.mini-card--info .mini-card__number { color: var(--color-info); }
-.mini-card--success .mini-card__number { color: var(--color-success); }
-.mini-card--muted .mini-card__number { color: var(--text-muted); }
+.stat-value { font-size: 26px; font-weight: 700; line-height: 1.2; }
+.stat-value.blue { color: var(--accent); }
+.stat-value.green { color: var(--color-success); }
+.stat-value.purple { color: var(--color-purple); }
+.stat-value.orange { color: var(--color-warning); }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
 @media (max-width: 900px) {
-  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>

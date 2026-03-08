@@ -129,7 +129,7 @@ function toggleExpand() {
 .issue-structured { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.3s, opacity 0.2s; }
 .issue-card.expanded .issue-structured { max-height: 2000px; opacity: 1; margin-top: 10px; }
 .issue-field {
-  margin-bottom: 8px; padding: 6px 10px; background: rgba(30,41,59,0.4);
+  margin-bottom: 8px; padding: 6px 10px; background: var(--bg-muted);
   border-radius: 6px; border-left: 3px solid var(--border);
 }
 .issue-field__label {

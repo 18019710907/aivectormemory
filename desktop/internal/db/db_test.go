@@ -28,6 +28,7 @@ func setupTestDB(t *testing.T) *DB {
 		"CREATE TABLE IF NOT EXISTS tasks_archive (id INTEGER PRIMARY KEY AUTOINCREMENT, project_dir TEXT NOT NULL DEFAULT '', feature_id TEXT NOT NULL DEFAULT '', title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', sort_order INTEGER NOT NULL DEFAULT 0, parent_id INTEGER NOT NULL DEFAULT 0, task_type TEXT NOT NULL DEFAULT 'manual', metadata TEXT NOT NULL DEFAULT '{}', original_task_id INTEGER NOT NULL DEFAULT 0, archived_at TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
 		"CREATE TABLE IF NOT EXISTS memory_tags (memory_id TEXT NOT NULL, tag TEXT NOT NULL, PRIMARY KEY (memory_id, tag))",
 		"CREATE TABLE IF NOT EXISTS user_memory_tags (memory_id TEXT NOT NULL, tag TEXT NOT NULL, PRIMARY KEY (memory_id, tag))",
+		"CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), last_login TEXT)",
 	}
 	for _, sql := range tables {
 		if _, err := d.Exec(sql); err != nil {

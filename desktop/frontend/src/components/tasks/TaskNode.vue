@@ -56,7 +56,7 @@ const statusBadge: Record<string, 'warning' | 'info' | 'success' | 'muted'> = {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 16px; transition: background 0.15s; cursor: default;
 }
-.task-item:hover { background: rgba(99,102,241,0.06); }
+.task-item:hover { background: var(--accent-bg-subtle); }
 .task-checkbox {
   cursor: pointer; font-size: 16px; color: var(--text-muted);
   user-select: none; flex-shrink: 0;

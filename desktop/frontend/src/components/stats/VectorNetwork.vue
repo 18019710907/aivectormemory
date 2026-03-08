@@ -225,8 +225,8 @@ function onTagLinkClick(tag: string) {
 
 <style scoped>
 .vector-network {
-  margin-top: 20px; background: var(--bg-surface); border-radius: var(--radius-lg);
-  border: 1px solid var(--border); padding: 20px 24px;
+  margin-top: 20px; background: var(--glass-bg); border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); padding: 20px 24px;
   display: flex; flex-direction: column; flex: 1; min-height: 0;
 }
 .vector-network__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

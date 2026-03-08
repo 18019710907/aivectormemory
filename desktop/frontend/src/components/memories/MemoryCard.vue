@@ -70,7 +70,7 @@ function onCardClick() {
 .memory-card__header-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; flex: 1; }
 .memory-card__id {
   font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
-  background: rgba(51,65,85,0.5); padding: 2px 8px; border-radius: 4px; flex-shrink: 0;
+  background: var(--bg-muted); padding: 2px 8px; border-radius: 4px; flex-shrink: 0;
 }
 .memory-card__actions { display: flex; gap: 4px; }
 .memory-card__content {

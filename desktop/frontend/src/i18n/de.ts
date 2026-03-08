@@ -70,4 +70,10 @@ export default {
   launchWebDashboard: 'Web-Dashboard Starten', stopWebDashboard: 'Web-Dashboard Stoppen',
   webDashboardRunning: 'Web-Dashboard Lauft', webDashboardStopped: 'Web-Dashboard Gestoppt',
   selectAll: 'Alle Auswahlen', batchDeleteMemories: 'Stapel Loschen', confirmBatchDelete: '{n} ausgewahlte Erinnerungen loschen?',
+  auth: {
+    login: 'Anmelden', loginDesc: 'Melden Sie sich bei Ihrem AIVectorMemory-Konto an', createAccount: 'Konto erstellen', createAccountDesc: 'Neues AIVectorMemory-Konto registrieren',
+    register: 'Registrieren', username: 'Benutzername', usernamePlaceholder: 'Benutzername eingeben', password: 'Passwort', passwordPlaceholder: 'Passwort eingeben',
+    confirmPassword: 'Passwort bestatigen', confirmPasswordPlaceholder: 'Passwort erneut eingeben', fieldsRequired: 'Alle Felder sind erforderlich',
+    passwordTooShort: 'Passwort muss mindestens 6 Zeichen haben', passwordMismatch: 'Passworter stimmen nicht uberein', noAccount: 'Kein Konto?', hasAccount: 'Bereits ein Konto?', logout: 'Abmelden',
+  },
 }
