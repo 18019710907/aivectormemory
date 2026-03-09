@@ -134,12 +134,12 @@ export function HealthCheck() {
   return window['go']['main']['App']['HealthCheck']();
 }
 
-export function InstallPackage(arg1) {
-  return window['go']['main']['App']['InstallPackage'](arg1);
-}
-
 export function ImportMemories(arg1, arg2) {
   return window['go']['main']['App']['ImportMemories'](arg1, arg2);
+}
+
+export function InstallPackage(arg1) {
+  return window['go']['main']['App']['InstallPackage'](arg1);
 }
 
 export function IsWebDashboardRunning() {

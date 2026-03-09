@@ -24,7 +24,7 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-const AppVersion = "0.1.0"
+const AppVersion = "1.0.10"
 
 type App struct {
 	ctx       context.Context
@@ -502,8 +502,9 @@ func (a *App) CheckEnvironment() map[string]interface{} {
 
 	// Check aivectormemory installed + version
 	out, err := exec.Command(pythonPath, "-c",
-		"import aivectormemory; print(aivectormemory.__version__)").Output()
+		"from importlib.metadata import version; print(version('aivectormemory'))").CombinedOutput()
 	if err != nil {
+		result["error"] = fmt.Sprintf("import failed: %v\n%s", err, string(out))
 		return result
 	}
 	version := strings.TrimSpace(string(out))

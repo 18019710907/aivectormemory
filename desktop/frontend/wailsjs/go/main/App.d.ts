@@ -70,9 +70,9 @@ export function GetTasks(arg1:string,arg2:string,arg3:string,arg4:string):Promis
 
 export function HealthCheck():Promise<db.HealthReport>;
 
-export function InstallPackage(arg1:boolean):Promise<string>;
-
 export function ImportMemories(arg1:string,arg2:string):Promise<Record<string, number>>;
+
+export function InstallPackage(arg1:boolean):Promise<string>;
 
 export function IsWebDashboardRunning():Promise<boolean>;
 

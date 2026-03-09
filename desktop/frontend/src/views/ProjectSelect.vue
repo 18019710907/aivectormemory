@@ -28,6 +28,7 @@ const envStatus = ref<any>(null)
 const upgradeInfo = ref<any>(null)
 const installing = ref(false)
 const installResult = ref('') // 'success' | 'error'
+const installError = ref('')
 
 onMounted(async () => {
   projectStore.loadProjects()
@@ -48,8 +49,9 @@ async function handleInstall(upgrade = false) {
       CheckUpgrade(envStatus.value.avm_version).then(info => { upgradeInfo.value = info })
     }
     setTimeout(() => { installResult.value = '' }, 3000)
-  } catch {
+  } catch (e: any) {
     installResult.value = 'error'
+    installError.value = e?.message || String(e)
   } finally {
     installing.value = false
   }
@@ -185,6 +187,7 @@ async function confirmDelete() {
     </div>
     <div v-else-if="installResult === 'error'" class="env-banner env-banner--error">
       <span>{{ t('envInstallError') }}</span>
+      <span v-if="installError" style="font-size:11px;opacity:0.8;margin-left:8px">{{ installError }}</span>
     </div>
     <template v-else-if="envStatus?.avm_installed && upgradeInfo">
       <div v-if="upgradeInfo.avm_update_available" class="env-banner env-banner--info">
