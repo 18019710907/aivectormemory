@@ -19,6 +19,7 @@ dist/
 .claude/
 .kiro/
 .shared/
+.cursor/
 .opencode/
 .mcp.json
 CLAUDE.md
