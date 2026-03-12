@@ -14,6 +14,7 @@ dist/
 .devmemory/
 
 # IDE
+.cursor/
 .vscode/
 .idea/
 .claude/
