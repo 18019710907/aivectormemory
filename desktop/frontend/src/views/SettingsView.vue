@@ -10,6 +10,7 @@ import {
   LaunchWebDashboard, StopWebDashboard, IsWebDashboardRunning, OpenWebDashboard,
   HealthCheck, GetDBStats, RepairMissingEmbeddings, RebuildAllEmbeddings,
   BackupDB, RestoreDB, ListBackups,
+  GetAppVersion,
 } from '../../wailsjs/go/main/App'
 import Badge from '../components/common/Badge.vue'
 import Modal from '../components/layout/Modal.vue'
@@ -33,10 +34,12 @@ const rebuilding = ref(false)
 const confirmRebuildShow = ref(false)
 const confirmRestoreShow = ref(false)
 const restoreFile = ref('')
+const appVersion = ref('-')
 
 onMounted(async () => {
   try { detectedPython.value = await DetectPython() } catch {}
   try { webDashboardRunning.value = await IsWebDashboardRunning() } catch {}
+  try { appVersion.value = await GetAppVersion() } catch {}
   await loadMaintenance()
 })
 
@@ -286,7 +289,7 @@ function formatSize(bytes: number): string {
       <h3 class="section-title">{{ t('about') }}</h3>
       <div class="settings-row">
         <label class="settings-label">{{ t('version') }}</label>
-        <span class="settings-value">1.0.0</span>
+        <span class="settings-value">{{ appVersion }}</span>
       </div>
     </section>
 
