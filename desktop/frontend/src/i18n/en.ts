@@ -130,6 +130,7 @@ export default {
   envNoPython: 'Python not detected. Please install Python 3.10+',
   envNoPythonLink: 'Download Python',
   envNoPackage: 'Python detected, but AIVectorMemory is not installed',
+  envPythonPath: 'Python path:',
   envInstallBtn: 'Install Now',
   envInstalling: 'Installing...',
   envInstallSuccess: 'AIVectorMemory installed successfully!',

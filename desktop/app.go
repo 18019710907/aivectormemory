@@ -515,8 +515,12 @@ func (a *App) CheckEnvironment() map[string]interface{} {
 		"avm_version":   "",
 	}
 
-	// Find Python (reuse candidate logic from embedding.DetectPython)
-	pythonPath := a.findPython()
+	// Prefer a Python that already has aivectormemory installed (matches dev behavior)
+	pythonPath := embedding.DetectPython()
+	if pythonPath == "" {
+		// Fallback: find any python (used for install flow)
+		pythonPath = a.findPython()
+	}
 	if pythonPath == "" {
 		return result
 	}
@@ -639,39 +643,19 @@ func (a *App) InstallPackage(upgrade bool) (string, error) {
 
 func (a *App) findPython() string {
 	// If settings has a custom python path, try it first
-	if a.settings != nil && a.settings.PythonPath != "" {
-		if _, err := os.Stat(a.settings.PythonPath); err == nil {
-			return a.settings.PythonPath
-		}
+	preferred := ""
+	if a.settings != nil {
+		preferred = a.settings.PythonPath
 	}
 	// If engine already detected one, use it
 	if a.engine != nil && a.engine.PythonPath != "" {
 		return a.engine.PythonPath
 	}
 
-	// Scan candidates (find Python, not necessarily with aivectormemory)
-	home, _ := os.UserHomeDir()
-	candidates := []string{
-		filepath.Join(home, "item", "run-memory-mcp-server", ".venv", "bin", "python3"),
-		"python3", "python",
-		"/usr/local/bin/python3",
-		"/usr/bin/python3",
-		"/opt/homebrew/bin/python3",
-	}
-	for _, py := range candidates {
-		path := py
-		if !filepath.IsAbs(path) {
-			found, err := exec.LookPath(path)
-			if err != nil {
-				continue
-			}
-			path = found
-		}
-		if _, err := os.Stat(path); err == nil {
-			return path
-		}
-	}
-	return ""
+	return embedding.FindPython(embedding.PythonFindOptions{
+		RequireAIVectorMemory: false,
+		PreferredPath:         preferred,
+	})
 }
 
 func expandHome(path string) string {

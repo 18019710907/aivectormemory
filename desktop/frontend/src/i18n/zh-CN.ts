@@ -130,6 +130,7 @@ export default {
   envNoPython: '未检测到 Python，请安装 Python 3.10+',
   envNoPythonLink: '下载 Python',
   envNoPackage: '检测到 Python，但未安装 AIVectorMemory',
+  envPythonPath: 'Python 路径：',
   envInstallBtn: '一键安装',
   envInstalling: '安装中...',
   envInstallSuccess: 'AIVectorMemory 安装成功！',

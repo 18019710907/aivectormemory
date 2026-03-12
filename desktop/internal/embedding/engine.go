@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 type Engine struct {
@@ -95,47 +94,6 @@ func (e *Engine) EncodeBatch(texts []string) ([][]float32, error) {
 	return results, nil
 }
 
-// DetectPython finds a Python interpreter with aivectormemory installed
 func DetectPython() string {
-	candidates := []string{}
-
-	// Check project venv first
-	home, _ := os.UserHomeDir()
-	venvPaths := []string{
-		filepath.Join(home, "item", "run-memory-mcp-server", ".venv", "bin", "python3"),
-		filepath.Join(home, "item", "run-memory-mcp-server", ".venv", "bin", "python"),
-	}
-	candidates = append(candidates, venvPaths...)
-
-	// System paths
-	systemPaths := []string{"python3", "python"}
-	candidates = append(candidates, systemPaths...)
-
-	// Common installation paths
-	commonPaths := []string{
-		"/usr/local/bin/python3",
-		"/usr/bin/python3",
-		"/opt/homebrew/bin/python3",
-	}
-	candidates = append(candidates, commonPaths...)
-
-	for _, py := range candidates {
-		path := py
-		if !filepath.IsAbs(path) {
-			found, err := exec.LookPath(path)
-			if err != nil {
-				continue
-			}
-			path = found
-		}
-		if _, err := os.Stat(path); err != nil {
-			continue
-		}
-		// Verify aivectormemory is importable
-		out, err := exec.Command(path, "-c", "import aivectormemory; print('ok')").Output()
-		if err == nil && strings.TrimSpace(string(out)) == "ok" {
-			return path
-		}
-	}
-	return ""
+	return FindPython(PythonFindOptions{RequireAIVectorMemory: true})
 }

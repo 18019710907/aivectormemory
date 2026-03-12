@@ -34,6 +34,7 @@ const installError = ref('')
 onMounted(async () => {
   projectStore.loadProjects()
   envStatus.value = await CheckEnvironment()
+  console.log('[env] python_path:', envStatus.value?.python_path, 'avm_installed:', envStatus.value?.avm_installed, 'avm_version:', envStatus.value?.avm_version)
   if (envStatus.value?.avm_installed) {
     CheckUpgrade(envStatus.value.avm_version).then(info => { upgradeInfo.value = info })
   }
@@ -177,6 +178,9 @@ async function confirmDelete() {
     </div>
     <div v-else-if="envStatus && !envStatus.avm_installed && !installing && installResult !== 'success'" class="env-banner env-banner--info">
       <span>{{ t('envNoPackage') }}</span>
+      <span v-if="envStatus.python_path" class="env-banner__meta">
+        {{ t('envPythonPath') }} <code class="env-banner__code" :title="envStatus.python_path">{{ envStatus.python_path }}</code>
+      </span>
       <button class="env-banner__btn" @click="handleInstall(false)">{{ t('envInstallBtn') }}</button>
     </div>
     <div v-else-if="installing" class="env-banner env-banner--info">
@@ -448,6 +452,15 @@ async function confirmDelete() {
 }
 .env-banner__btn:hover { opacity: 0.85; }
 .env-banner--warning .env-banner__btn { background: hsl(45 80% 50%); color: #1a1a2e; }
+.env-banner__meta { font-size: 11px; opacity: 0.9; }
+.env-banner__code {
+  display: inline-block; max-width: 520px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 1px 6px; border-radius: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16);
+  font-family: var(--font-mono);
+  vertical-align: bottom;
+}
 .env-banner__spinner {
   width: 16px; height: 16px; border: 2px solid var(--accent-light); border-top-color: transparent;
   border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
