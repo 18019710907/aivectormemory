@@ -117,7 +117,7 @@ func TestIssuesCRUD(t *testing.T) {
 	}
 
 	// List
-	result, err := d.GetIssues(pdir, "", "", "", 20, 0)
+	result, err := d.GetIssues(pdir, "", "", "", "", 20, 0)
 	if err != nil {
 		t.Fatalf("GetIssues: %v", err)
 	}
@@ -129,13 +129,13 @@ func TestIssuesCRUD(t *testing.T) {
 	if err := d.ArchiveIssue(issue.ID, pdir); err != nil {
 		t.Fatalf("ArchiveIssue: %v", err)
 	}
-	result, _ = d.GetIssues(pdir, "", "", "", 20, 0)
+	result, _ = d.GetIssues(pdir, "", "", "", "", 20, 0)
 	if result.Total != 0 {
 		t.Fatalf("expected 0 active issues after archive, got %d", result.Total)
 	}
 
 	// Archived list
-	archived, _ := d.GetIssues(pdir, "archived", "", "", 20, 0)
+	archived, _ := d.GetIssues(pdir, "archived", "", "", "", 20, 0)
 	if archived.Total != 1 {
 		t.Fatalf("expected 1 archived issue, got %d", archived.Total)
 	}

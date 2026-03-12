@@ -14,9 +14,9 @@ const { t } = useI18n()
 const route = useRoute()
 
 const {
-  issues, total, page, statusFilter, loading,
+  issues, total, totalAll, totalToday, page, statusFilter, dateFrom, dateTo, loading,
   load, getDetail, create, updateFull, archive, remove,
-  setPage, setStatus, setDate, setQuery, PAGE_SIZE,
+  setPage, setStatus, setDateRange, setQuery, PAGE_SIZE,
 } = useIssues()
 
 // Edit/Create modal
@@ -40,19 +40,34 @@ onMounted(() => {
 
 function onSearch(q: string) { setQuery(q) }
 
+function todayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function quickFilter(s: string) {
   if (s === 'today') {
-    const d = new Date()
-    setDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
+    const t = todayStr()
+    setDateRange(t, t)
+  } else if (s === 'last3') {
+    const end = new Date()
+    const start = new Date(end)
+    start.setDate(start.getDate() - 2)
+    const from = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+    const to = todayStr()
+    setDateRange(from, to)
+  } else if (s === 'all') {
+    setDateRange('', '')
   } else {
-    setDate('')
     setStatus(s)
   }
 }
 
 function onStatusChange(e: Event) { setStatus((e.target as HTMLSelectElement).value) }
 
-function onDateChange(e: Event) { setDate((e.target as HTMLInputElement).value) }
+function onDateFromChange(e: Event) { setDateRange((e.target as HTMLInputElement).value, dateTo.value) }
+
+function onDateToChange(e: Event) { setDateRange(dateFrom.value, (e.target as HTMLInputElement).value) }
 
 // Create
 function openCreate() {
@@ -135,12 +150,34 @@ async function openView(issue: any) {
   <div class="issues-view">
     <div class="page-header">
       <h2 class="page-title">{{ t('issueTracking') }}</h2>
-      <span class="page-count">{{ t('total') }} {{ total }} {{ t('items') }}</span>
+      <div class="page-stats">
+        <span class="stat-pill">
+          <span class="stat-pill__label">{{ t('issuesTotalAll') }}</span>
+          <span class="stat-pill__num">{{ totalAll }}</span>
+          <span class="stat-pill__unit">{{ t('items') }}</span>
+        </span>
+        <span class="stat-pill">
+          <span class="stat-pill__label">{{ t('issuesTotalToday') }}</span>
+          <span class="stat-pill__num">{{ totalToday }}</span>
+          <span class="stat-pill__unit">{{ t('items') }}</span>
+        </span>
+        <span class="stat-pill stat-pill--highlight">
+          <span class="stat-pill__label">{{ t('issuesCurrentQuery') }}</span>
+          <span class="stat-pill__num">{{ total }}</span>
+          <span class="stat-pill__unit">{{ t('items') }}</span>
+        </span>
+      </div>
     </div>
 
-    <!-- Toolbar -->
+    <!-- Toolbar: 时间范围 + 状态 + 范围搜索 -->
     <div class="toolbar toolbar--wrap">
-      <input type="date" class="filter-input" @change="onDateChange" />
+      <span class="filter-label">{{ t('dateRange') }}</span>
+      <input type="date" class="filter-input" :value="dateFrom" @change="onDateFromChange" :title="t('dateFrom')" />
+      <span class="filter-sep">–</span>
+      <input type="date" class="filter-input" :value="dateTo" @change="onDateToChange" :title="t('dateTo')" />
+      <button class="btn btn--outline btn--sm" @click="quickFilter('today')">{{ t('today') }}</button>
+      <button class="btn btn--outline btn--sm" @click="quickFilter('last3')">{{ t('last3Days') }}</button>
+      <button class="btn btn--outline btn--sm" @click="quickFilter('all')">{{ t('viewAll') }}</button>
       <select class="filter-select" :value="statusFilter" @change="onStatusChange">
         <option value="all">{{ t('allIncludeArchived') }}</option>
         <option value="active">{{ t('activeOnly') }}</option>
@@ -149,10 +186,8 @@ async function openView(issue: any) {
         <option value="completed">{{ t('status.completed') }}</option>
         <option value="archived">{{ t('status.archived') }}</option>
       </select>
-      <SearchBox :placeholder="t('searchIssue')" @search="onSearch" />
+      <SearchBox :placeholder="t('searchIssueInRange')" @search="onSearch" />
       <div class="toolbar-right">
-        <button class="btn btn--outline btn--sm" @click="quickFilter('all')">{{ t('viewAll') }}</button>
-        <button class="btn btn--outline btn--sm" @click="quickFilter('today')">{{ t('today') }}</button>
         <button class="btn btn--primary btn--sm" @click="openCreate">{{ t('addIssue') }}</button>
       </div>
     </div>
@@ -225,6 +260,21 @@ async function openView(issue: any) {
 
 <style scoped>
 .issues-view { display: flex; flex-direction: column; flex: 1; }
+.page-header { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.page-stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stat-pill {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08); border: 1px solid var(--border);
+  font-size: 13px;
+}
+.stat-pill__label { color: var(--text-muted); font-weight: 500; }
+.stat-pill__num { color: var(--text-heading); font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat-pill__unit { color: var(--text-muted); font-size: 12px; }
+.stat-pill--highlight { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.25); }
+.stat-pill--highlight .stat-pill__num { color: var(--color-primary, #3b82f6); }
+.filter-label { font-size: 12px; color: var(--text-muted); margin-right: 6px; }
+.filter-sep { margin: 0 4px; color: var(--text-muted); }
 .view-field { margin-bottom: 16px; }
 .view-label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .view-value { font-size: 13px; color: var(--text-heading); white-space: pre-wrap; line-height: 1.6; }

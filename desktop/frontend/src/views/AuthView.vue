@@ -75,7 +75,8 @@ async function handleSubmit() {
     }
     router.replace('/')
   } catch (e: any) {
-    error.value = e?.message || 'Failed'
+    const msg = typeof e === 'string' ? e : e?.message
+    error.value = msg === 'username_taken' ? t('auth.usernameTaken') : (msg || 'Failed')
   } finally {
     loading.value = false
   }

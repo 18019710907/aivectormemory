@@ -128,6 +128,8 @@ export namespace db {
 	export class IssueListResult {
 	    issues: Issue[];
 	    total: number;
+	    total_all: number;
+	    total_today: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new IssueListResult(source);
@@ -137,6 +139,8 @@ export namespace db {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.issues = this.convertValues(source["issues"], Issue);
 	        this.total = source["total"];
+	        this.total_all = source["total_all"];
+	        this.total_today = source["total_today"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

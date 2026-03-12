@@ -5,7 +5,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -98,6 +100,9 @@ func (m *Manager) Register(username, password string) error {
 		username, pwHash, time.Now().UTC().Format(time.RFC3339),
 	)
 	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return errors.New("username_taken")
+		}
 		return fmt.Errorf("create user: %w", err)
 	}
 	return nil

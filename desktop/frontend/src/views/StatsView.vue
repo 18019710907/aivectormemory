@@ -60,7 +60,7 @@ async function onCardClick(type: 'memories' | 'issues', scope?: string, status?:
   } else if (type === 'issues' && status) {
     issueModalTitle.value = t(`status.${status}`)
     try {
-      const result = await GetIssues(projectStore.current, status, '', '', 50, 0)
+      const result = await GetIssues(projectStore.current, status, '', '', '', 50, 0)
       issueModalResults.value = result?.issues || []
     } catch (e) {
       issueModalResults.value = []

@@ -132,12 +132,12 @@ func (a *App) GetStats(projectDir string) (map[string]interface{}, error) {
 	// Issue status counts
 	statusCounts := map[string]int{}
 	for _, s := range []string{"pending", "in_progress", "completed"} {
-		result, _ := a.database.GetIssues(projectDir, s, "", "", 1, 0)
+		result, _ := a.database.GetIssues(projectDir, s, "", "", "", 1, 0)
 		if result != nil {
 			statusCounts[s] = result.Total
 		}
 	}
-	archivedResult, _ := a.database.GetIssues(projectDir, "archived", "", "", 1, 0)
+	archivedResult, _ := a.database.GetIssues(projectDir, "archived", "", "", "", 1, 0)
 	if archivedResult != nil {
 		statusCounts["archived"] = archivedResult.Total
 	}
@@ -221,8 +221,8 @@ func (a *App) SearchMemories(query, scope, projectDir string, tags []string, top
 
 // ============== Issues ==============
 
-func (a *App) GetIssues(projectDir, status, date, keyword string, limit, offset int) (*db.IssueListResult, error) {
-	return a.database.GetIssues(projectDir, status, date, keyword, limit, offset)
+func (a *App) GetIssues(projectDir, status, dateFrom, dateTo, keyword string, limit, offset int) (*db.IssueListResult, error) {
+	return a.database.GetIssues(projectDir, status, dateFrom, dateTo, keyword, limit, offset)
 }
 
 func (a *App) GetIssueDetail(id int, projectDir string) (*db.Issue, error) {

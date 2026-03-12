@@ -48,7 +48,7 @@ export function GetDBStats():Promise<db.DBStats>;
 
 export function GetIssueDetail(arg1:number,arg2:string):Promise<db.Issue>;
 
-export function GetIssues(arg1:string,arg2:string,arg3:string,arg4:string,arg5:number,arg6:number):Promise<db.IssueListResult>;
+export function GetIssues(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:number,arg7:number):Promise<db.IssueListResult>;
 
 export function GetMemories(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:number,arg7:number):Promise<db.MemoryListResult>;
 

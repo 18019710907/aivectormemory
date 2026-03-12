@@ -32,20 +32,26 @@ type Issue struct {
 }
 
 type IssueListResult struct {
-	Issues []Issue `json:"issues"`
-	Total  int     `json:"total"`
+	Issues     []Issue `json:"issues"`
+	Total      int     `json:"total"`
+	TotalAll   int     `json:"total_all"`
+	TotalToday int     `json:"total_today"`
 }
 
-func (d *DB) GetIssues(projectDir, status, date, keyword string, limit, offset int) (*IssueListResult, error) {
+func (d *DB) GetIssues(projectDir, status, dateFrom, dateTo, keyword string, limit, offset int) (*IssueListResult, error) {
 	if limit <= 0 {
 		limit = 20
 	}
+	today := time.Now().Format("2006-01-02")
+	var totalAll, totalToday int
+	d.QueryRow("SELECT COUNT(*) FROM (SELECT id FROM issues WHERE project_dir=? UNION ALL SELECT id FROM issues_archive WHERE project_dir=?)", projectDir, projectDir).Scan(&totalAll)
+	d.QueryRow("SELECT COUNT(*) FROM (SELECT id FROM issues WHERE project_dir=? AND date=? UNION ALL SELECT id FROM issues_archive WHERE project_dir=? AND date=?)", projectDir, today, projectDir, today).Scan(&totalToday)
 
 	if status == "archived" {
-		return d.getArchivedIssues(projectDir, date, keyword, limit, offset)
+		return d.getArchivedIssues(projectDir, dateFrom, dateTo, keyword, limit, offset, totalAll, totalToday)
 	}
 	if status == "" || status == "all" {
-		return d.getAllIssues(projectDir, date, keyword, limit, offset)
+		return d.getAllIssues(projectDir, dateFrom, dateTo, keyword, limit, offset, totalAll, totalToday)
 	}
 
 	where := []string{"project_dir=?"}
@@ -57,9 +63,10 @@ func (d *DB) GetIssues(projectDir, status, date, keyword string, limit, offset i
 		where = append(where, "status=?")
 		args = append(args, status)
 	}
-	if date != "" {
-		where = append(where, "date=?")
-		args = append(args, date)
+	dateWhere, dateArgs := dateRangeClause(dateFrom, dateTo)
+	if dateWhere != "" {
+		where = append(where, dateWhere)
+		args = append(args, dateArgs...)
 	}
 	if keyword != "" {
 		where = append(where, "(title LIKE ? OR content LIKE ?)")
@@ -80,19 +87,30 @@ func (d *DB) GetIssues(projectDir, status, date, keyword string, limit, offset i
 	defer rows.Close()
 
 	issues := scanIssues(rows)
-
-	// Attach task progress
 	d.attachTaskProgress(projectDir, issues)
-
-	return &IssueListResult{Issues: issues, Total: total}, nil
+	return &IssueListResult{Issues: issues, Total: total, TotalAll: totalAll, TotalToday: totalToday}, nil
 }
 
-func (d *DB) getArchivedIssues(projectDir, date, keyword string, limit, offset int) (*IssueListResult, error) {
+func dateRangeClause(dateFrom, dateTo string) (string, []interface{}) {
+	if dateFrom != "" && dateTo != "" {
+		return "date >= ? AND date <= ?", []interface{}{dateFrom, dateTo}
+	}
+	if dateFrom != "" {
+		return "date >= ?", []interface{}{dateFrom}
+	}
+	if dateTo != "" {
+		return "date <= ?", []interface{}{dateTo}
+	}
+	return "", nil
+}
+
+func (d *DB) getArchivedIssues(projectDir, dateFrom, dateTo, keyword string, limit, offset int, totalAll, totalToday int) (*IssueListResult, error) {
 	where := []string{"project_dir=?"}
 	args := []interface{}{projectDir}
-	if date != "" {
-		where = append(where, "date=?")
-		args = append(args, date)
+	dateWhere, dateArgs := dateRangeClause(dateFrom, dateTo)
+	if dateWhere != "" {
+		where = append(where, dateWhere)
+		args = append(args, dateArgs...)
 	}
 	if keyword != "" {
 		where = append(where, "(title LIKE ? OR content LIKE ?)")
@@ -112,19 +130,20 @@ func (d *DB) getArchivedIssues(projectDir, date, keyword string, limit, offset i
 	defer rows.Close()
 
 	issues := scanIssues(rows)
-	return &IssueListResult{Issues: issues, Total: total}, nil
+	return &IssueListResult{Issues: issues, Total: total, TotalAll: totalAll, TotalToday: totalToday}, nil
 }
 
-func (d *DB) getAllIssues(projectDir, date, keyword string, limit, offset int) (*IssueListResult, error) {
+func (d *DB) getAllIssues(projectDir, dateFrom, dateTo, keyword string, limit, offset int, totalAll, totalToday int) (*IssueListResult, error) {
 	w1 := "WHERE project_dir=?"
 	w2 := "WHERE project_dir=?"
 	p1 := []interface{}{projectDir}
 	p2 := []interface{}{projectDir}
-	if date != "" {
-		w1 += " AND date=?"
-		w2 += " AND date=?"
-		p1 = append(p1, date)
-		p2 = append(p2, date)
+	dateWhere, dateArgs := dateRangeClause(dateFrom, dateTo)
+	if dateWhere != "" {
+		w1 += " AND " + dateWhere
+		w2 += " AND " + dateWhere
+		p1 = append(p1, dateArgs...)
+		p2 = append(p2, dateArgs...)
 	}
 	if keyword != "" {
 		w1 += " AND (title LIKE ? OR content LIKE ?)"
@@ -152,7 +171,7 @@ func (d *DB) getAllIssues(projectDir, date, keyword string, limit, offset int) (
 
 	issues := scanIssues(rows)
 	d.attachTaskProgress(projectDir, issues)
-	return &IssueListResult{Issues: issues, Total: total}, nil
+	return &IssueListResult{Issues: issues, Total: total, TotalAll: totalAll, TotalToday: totalToday}, nil
 }
 
 func (d *DB) GetIssueDetail(id int, projectDir string) (*Issue, error) {
